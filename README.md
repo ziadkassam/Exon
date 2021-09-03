@@ -4,7 +4,7 @@ A PoC library implementation of Exon: Exactly-Once Oblivious Messaging Protocol
 Exon is a host-to-host message-based protocol that is op- timized to guarantee the exactly-once (EO) delivery of these messages. This is possible through the concept of reserving slots at the destination host before sending any payload. When a slot is first consumed at the destination host, it is deleted and, therefore, duplication will not occur no mat- ter how many retransmissions are done, e.g., given possible network issues.
 
 
-!Features Highlights
+Features Highlights
 ---
 
 
@@ -35,8 +35,10 @@ Run
 
 **Oneway**
 Receiver> java -classpath target/classes haslab.eo.Receiver host port noMsgs msgSize comType N
+
 Sender>   java -classpath target/classes haslab.eo.Sender host port noMsgs msgSize comType N
 
 **RPC**
 Server> java -classpath target/classes haslab.eo.Server host port N
+
 Client> java -classpath target/classes haslab.eo.Client host port N noMsgs msgSize actors
