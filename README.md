@@ -1,7 +1,10 @@
 A PoC library implementation of Exon: Exactly-Once Oblivious Messaging Protocol
 ---
 
-Exon is a host-to-host message-based protocol that is op- timized to guarantee the exactly-once (EO) delivery of these messages. This is possible through the concept of reserving slots at the destination host before sending any payload. When a slot is first consumed at the destination host, it is deleted and, therefore, duplication will not occur no mat- ter how many retransmissions are done, e.g., given possible network issues.
+Exon is a host-to-host message-based protocol that is optimized to guarantee the exactly-once (EO) delivery of these messages. 
+This is possible through the concept of reserving slots at the destination host before sending any payload. 
+When a slot is first consumed at the destination host, it is deleted and, therefore, 
+duplication will not occur no matter how many retransmissions are done, e.g., given possible network issues.
 
 
 Features Highlights
@@ -19,26 +22,23 @@ Exon has a combination of ingredients which allows ensuring exactly-once deliver
 - **Order-less**: to be more generic, Exon is deprived from unnecessary ordering restrictions of messages. Message ordering (e.g., FIFO) can easily be implemented on top of \pro if required.
 
 
-Getting started
+How-to try it
 ---
+1 - Generate the bytecode classes from the source code:
 
+shell> javac -sourcepath src -classpath classes: -d target/classes src/main/java/haslab/eo/*.java src/main/java/haslab/eo/events/*.java src/main/java/haslab/eo/msgs/*.java src/main/java/io/github/pssalmeida/slidingbitmap/*.java src/test/java/haslab/eo/*.java
 
-**Compile**
-javac -sourcepath src -classpath classes: -d target/classes src/main/java/haslab/eo/*.java src/main/java/haslab/eo/events/*.java src/main/java/haslab/eo/msgs/*.java src/main/java/io/github/pssalmeida/slidingbitmap/*.java src/test/java/haslab/eo/*.java
+2 - Run the Middleware to test the oneway unidirectional or bidirectional messaging
 
-Run
---
-- comType: 1:unidirectional 2:bidirectional
-- N: number of slots to be kept in reserve
-- actors: number of simulated actors (virtual clients)
------------------------------------------
-
-**Oneway**
-Receiver> java -classpath target/classes haslab.eo.Receiver host port noMsgs msgSize comType N
-
+Receiver> java -classpath target/classes haslab.eo.Receiver host port noMsgs msgSize comType N <br />
 Sender>   java -classpath target/classes haslab.eo.Sender host port noMsgs msgSize comType N
 
-**RPC**
-Server> java -classpath target/classes haslab.eo.Server host port N
+or to test the RPC communication
 
+Server> java -classpath target/classes haslab.eo.Server host port N <br />
 Client> java -classpath target/classes haslab.eo.Client host port N noMsgs msgSize actors
+
+Note:
+- unidirectional: comType=1, bidirectional: comType=2
+- N: window of slots in advance
+- actors: number of simulated actors (virtual clients)
