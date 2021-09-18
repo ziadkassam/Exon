@@ -6,7 +6,7 @@ public class Sender {
 	// 1: one-way, 2: bidirectional not RPC
 	private static final int COMTYPE2 = 2;
 	private static final int PORT = 1234;
-	private static int dstPort, iterations, len, P, warmUp = 0, comType;
+	private static int dstPort, iterations, len, P, warmUp = 10000, comType;
 	private EOMiddleware eom;
 	private NodeId dstNode;
 

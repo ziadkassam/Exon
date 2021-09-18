@@ -6,7 +6,7 @@ public class Receiver {
 	// 1: one-way, 2: bidirectional not RPC
 	private static final int COMTYPE2 = 2;
 	private static final int PORT = 3456;
-	private static int dstPort, iterations, len, P, warmUp = 0, comType;
+	private static int dstPort, iterations, len, P, warmUp = 10000, comType;
 	private EOMiddleware eom;
 	private NodeId dstNode;
 
@@ -50,6 +50,7 @@ public class Receiver {
 			boolean started = false;
 			try {
 				// Warming up
+				long start = System.currentTimeMillis();
 				for (int i = 0; i < warmUp; i++) {
 					eom.receive();
 					if ((!started) && (comType == COMTYPE2)) {
@@ -57,13 +58,19 @@ public class Receiver {
 						new Sending().start();
 					}
 				}
-				long start = System.currentTimeMillis();
+				long duration = System.currentTimeMillis() - start;
+				float mps = warmUp / (duration / 1000.0f);
+				bandwidth = mps*len*8/1000000;
+				eom.P = ((bandwidth*1000000/8)*(eom.announceRTT/1000))/len;
+				eom.N = P*4;
+	
+				start = System.currentTimeMillis();
 				for (int i = 0; i < iterations; i++) {
 					eom.receive();
-					System.out.println(i);
+					//System.out.println(i);
 				}
-				long duration = System.currentTimeMillis() - start;
-				float mps = iterations / (duration / 1000.0f);
+				duration = System.currentTimeMillis() - start;
+				mps = iterations / (duration / 1000.0f);
 				System.out.println("msg/s: " + mps + " throughput (B/s): " + mps * 1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();

@@ -10,7 +10,6 @@ duplication will not occur no matter how many retransmissions are done, e.g., gi
 Features Highlights
 ---
 
-
 Exon has a combination of ingredients which allows ensuring exactly-once delivery over unreliable networks, while being network and memory efficient, namely:
 
 - **Message-based**: conceptually, Exon is a four-way protocol per message (not byte segments); thus treating each message separately, assigning each message a unique identifier.
@@ -39,6 +38,8 @@ Server> java -classpath target/classes haslab.eo.Server host port N <br />
 Client> java -classpath target/classes haslab.eo.Client host port N noMsgs msgSize actors
 
 Note:
+- At the Server/Receiver side, the port should be 1234, on the Client/Sender side should be 3456  
 - unidirectional: comType=1, bidirectional: comType=2
 - N: window of slots in advance
 - actors: number of simulated actors (virtual clients)
+
