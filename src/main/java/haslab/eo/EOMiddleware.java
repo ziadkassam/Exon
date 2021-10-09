@@ -17,13 +17,13 @@ public class EOMiddleware {
 	private BlockingQueue<DQMsg> deliveryQueue = new ArrayBlockingQueue<DQMsg>(1000000);
 	private ConcurrentHashMap<NodeId, SendRecord> sr = new ConcurrentHashMap<NodeId, SendRecord>();
 	private DatagramSocket sk;
-	private int N, P;
+	int N, P;
 	private final int maxAcks = 1;
 	private ByteBuffer bb;
 	private final int MTUSize = 1400;
 	private final int REQSLOT = 1, SLOT = 2, TOKEN = 3, ACK = 4;
 	private byte[] outData;
-	double announceRTT;
+	double announceRTT = 10;
 
 	private EOMiddleware(int port, int P) throws SocketException {
 		sk = new DatagramSocket(port);
@@ -181,7 +181,7 @@ public class EOMiddleware {
 								// calculating RTT
 								long newRTT = currentTime - c.reqSlotsTime;
 								c.RTT = (ALPHA * c.RTT) + ((1 - ALPHA) * newRTT);
-								announceRTT = c.RTT //to tell Receiver to calculate N
+								announceRTT = c.RTT; //announces the RTT to the Reiver.java to calculate N
 									
 								c.rck = r;
 								c.envelopes.append(s + n);

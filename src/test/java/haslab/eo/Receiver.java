@@ -58,12 +58,16 @@ public class Receiver {
 						new Sending().start();
 					}
 				}
+				//N calculation
 				long duration = System.currentTimeMillis() - start;
-				float mps = warmUp / (duration / 1000.0f);
-				bandwidth = mps*len*8/1000000;
-				eom.P = ((bandwidth*1000000/8)*(eom.announceRTT/1000))/len;
-				eom.N = P*4;
-	
+				double mps = warmUp / (duration / 1000.0f);
+				double bandwidth = mps*len*8/1000000;
+				eom.P = (int) ((bandwidth*1000000/8)*(eom.announceRTT/1000))/len;				
+				eom.N = eom.P*4;
+				//send N to the sender
+				//eom.send(dstNode, m.getBytes());
+				System.out.println("N: " + eom.N);
+				
 				start = System.currentTimeMillis();
 				for (int i = 0; i < iterations; i++) {
 					eom.receive();
