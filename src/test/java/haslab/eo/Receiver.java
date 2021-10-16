@@ -6,7 +6,7 @@ public class Receiver {
 	// 1: one-way, 2: bidirectional not RPC
 	private static final int COMTYPE2 = 2;
 	private static final int PORT = 3456;
-	private static int dstPort, iterations, len, P, warmUp = 10000, comType;
+	private static int dstPort, iterations, len, warmUp = 1000, comType;
 	private EOMiddleware eom;
 	private NodeId dstNode;
 
@@ -21,9 +21,8 @@ public class Receiver {
 		iterations = Integer.parseInt(args[2]);
 		len = Integer.parseInt(args[3]);
 		comType = Integer.parseInt(args[4]);
-		P = Integer.parseInt(args[5]);
 
-		EOMiddleware eom = EOMiddleware.start(PORT, P);
+		EOMiddleware eom = EOMiddleware.start(PORT);
 		Receiver r1 = new Receiver(eom, dstHost, dstPort);
 		r1.new Receiving().start();
 	}
@@ -39,7 +38,7 @@ public class Receiver {
 				for (int i = 0; i < iterations; i++) {
 					eom.send(dstNode, m.getBytes());
 				}
-			} catch (InterruptedException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -50,7 +49,6 @@ public class Receiver {
 			boolean started = false;
 			try {
 				// Warming up
-				long start = System.currentTimeMillis();
 				for (int i = 0; i < warmUp; i++) {
 					eom.receive();
 					if ((!started) && (comType == COMTYPE2)) {
@@ -58,23 +56,13 @@ public class Receiver {
 						new Sending().start();
 					}
 				}
-				//N calculation
-				long duration = System.currentTimeMillis() - start;
-				double mps = warmUp / (duration / 1000.0f);
-				double bandwidth = mps*len*8/1000000;
-				eom.P = (int) ((bandwidth*1000000/8)*(eom.announceRTT/1000))/len;				
-				eom.N = eom.P*4;
-				//send N to the sender
-				//eom.send(dstNode, m.getBytes());
-				System.out.println("N: " + eom.N);
-				
-				start = System.currentTimeMillis();
+				long start = System.currentTimeMillis();
 				for (int i = 0; i < iterations; i++) {
 					eom.receive();
-					//System.out.println(i);
+					// System.out.println(i);
 				}
-				duration = System.currentTimeMillis() - start;
-				mps = iterations / (duration / 1000.0f);
+				long duration = System.currentTimeMillis() - start;
+				double mps = iterations / (duration / 1000.0f);
 				System.out.println("msg/s: " + mps + " throughput (B/s): " + mps * 1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();

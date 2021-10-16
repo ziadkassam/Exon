@@ -8,10 +8,9 @@ public class Client {
 	public static void main(String[] args) throws Exception {
 		String dstHost = args[0];
 		int dstPort = Integer.parseInt(args[1]);
-		int P = Integer.parseInt(args[2]);
-		int iterations = Integer.parseInt(args[3]);
-		int len = Integer.parseInt(args[4]);
-		int actors = Integer.parseInt(args[5]);
+		int iterations = Integer.parseInt(args[2]);
+		int len = Integer.parseInt(args[3]);
+		int actors = Integer.parseInt(args[4]);
 		
 		int reqSnt[] = new int[actors];
 		int repRcv[] = new int[actors];
@@ -24,7 +23,7 @@ public class Client {
 			repRcv[i] = 0;
 		}
 
-		EOMiddleware eom = EOMiddleware.start(PORT, P);
+		EOMiddleware eom = EOMiddleware.start(PORT);
 		NodeId dstNode = new NodeId(dstHost, dstPort);
 
 		long start = System.nanoTime();

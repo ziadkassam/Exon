@@ -29,17 +29,16 @@ shell> javac -sourcepath src -classpath classes: -d target/classes src/main/java
 
 2 - Run the Middleware to test the oneway unidirectional or bidirectional messaging
 
-Receiver> java -classpath target/classes haslab.eo.Receiver host port noMsgs msgSize comType N <br />
-Sender>   java -classpath target/classes haslab.eo.Sender host port noMsgs msgSize comType N
+Receiver> java -classpath target/classes haslab.eo.Receiver host port noMsgs msgSize comType <br />
+Sender>   java -classpath target/classes haslab.eo.Sender host port noMsgs msgSize comType
 
 or to test the RPC communication
 
-Server> java -classpath target/classes haslab.eo.Server host port N <br />
-Client> java -classpath target/classes haslab.eo.Client host port N noMsgs msgSize actors
+Server> java -classpath target/classes haslab.eo.Server host port <br />
+Client> java -classpath target/classes haslab.eo.Client host port noMsgs msgSize actors
 
 Note:
 - At the Server/Receiver side, the port should be 1234, on the Client/Sender side should be 3456  
 - unidirectional: comType=1, bidirectional: comType=2
-- N: window of slots in advance
 - actors: number of simulated actors (virtual clients)
 

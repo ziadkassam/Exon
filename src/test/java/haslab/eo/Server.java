@@ -8,9 +8,8 @@ public class Server {
 	public static void main(String[] args) throws Exception {
 		String dstHost = args[0];
 		int dstPort = Integer.parseInt(args[1]);
-		int P = Integer.parseInt(args[2]);
 
-		EOMiddleware eom = EOMiddleware.start(PORT, P);
+		EOMiddleware eom = EOMiddleware.start(PORT);
 		NodeId dstNode = new NodeId(dstHost, dstPort);
 
 		while (true) {

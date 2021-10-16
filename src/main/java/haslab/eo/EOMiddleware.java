@@ -23,26 +23,38 @@ public class EOMiddleware {
 	private final int MTUSize = 1400;
 	private final int REQSLOT = 1, SLOT = 2, TOKEN = 3, ACK = 4;
 	private byte[] outData;
-	double announceRTT = 10;
+	private boolean sendFirstTime = true, receiveFirstTime = true;
+	// for P calculations
+	private int port = 12121;
+	private int bandwidthIterations = 1000000;
+	private int rttIterations = 10000;
+	private int leng = 1024;
+	private int N_Multiplier = 4;
 
-	private EOMiddleware(int port, int P) throws SocketException {
+	private EOMiddleware(int port) throws SocketException {
 		sk = new DatagramSocket(port);
 		sk.setReceiveBufferSize(2000000000);
 		System.out.println("UDP DatagramSocket Created: " + port);
-		this.P = P;
-		N = P * 4;
 		bb = ByteBuffer.allocate(MTUSize);
 		outData = new byte[MTUSize];
 	}
 
-	public static EOMiddleware start(int port, int P) throws SocketException {
-		EOMiddleware eo = new EOMiddleware(port, P);
+	public static EOMiddleware start(int port) throws SocketException {
+		EOMiddleware eo = new EOMiddleware(port);
 		eo.new AlgoThread().start();
 		eo.new ReaderThread().start();
 		return eo;
 	}
 
-	public MsgId send(NodeId node, byte[] msg) throws InterruptedException {
+	public MsgId send(NodeId node, byte[] msg) throws InterruptedException, IOException {
+		if (sendFirstTime) {
+			sendFirstTime = false;
+			P = calculatePSender(node);
+			// P = 120;
+			N = P * N_Multiplier;
+			System.out.println("P= " + P + ", N=" + N);
+			System.out.println("----------------------------------- \n");
+		}
 		SendRecord c = sr.get(node);
 		if (c != null)
 			c.sem.acquire();
@@ -55,7 +67,6 @@ public class EOMiddleware {
 	private boolean netSend(NodeId node, NetMsg m) throws IOException, InterruptedException {
 
 		bb = ByteBuffer.wrap(outData);
-
 		if (m instanceof ReqSlotsMsg) {
 			ReqSlotsMsg rsm = (ReqSlotsMsg) m;
 			bb.putInt(REQSLOT).putLong(rsm.s).putLong(rsm.n).putLong(rsm.l).putDouble(rsm.RTT);
@@ -78,6 +89,17 @@ public class EOMiddleware {
 	}
 
 	public ClientMsg receive() throws InterruptedException {
+		if (receiveFirstTime) {
+			receiveFirstTime = false;
+			try {
+				P = calculatePReceiver();
+				N = P * N_Multiplier;
+				System.out.println("P= " + P + ", N=" + N);
+				System.out.println("----------------------------------- \n");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		DQMsg m = deliveryQueue.take();
 		return new ClientMsg(m.node, m.msg);
 	}
@@ -181,8 +203,6 @@ public class EOMiddleware {
 								// calculating RTT
 								long newRTT = currentTime - c.reqSlotsTime;
 								c.RTT = (ALPHA * c.RTT) + ((1 - ALPHA) * newRTT);
-								announceRTT = c.RTT; //announces the RTT to the Reiver.java to calculate N
-									
 								c.rck = r;
 								c.envelopes.append(s + n);
 								c.sck = s + n;
@@ -375,6 +395,75 @@ public class EOMiddleware {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	public int calculatePReceiver() throws IOException, InterruptedException {
+		int p = 0;
+		try (ServerSocket serverSocket = new ServerSocket(port)) {
+			System.out.println("Testing the network...");
+			Socket socket = serverSocket.accept();
+			InputStream input = socket.getInputStream();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+			OutputStream output = socket.getOutputStream();
+			PrintWriter writer = new PrintWriter(output, true);
+
+			// Calculating RTT
+			for (int i = 0; i < rttIterations; i++) {
+				String m = reader.readLine();
+				writer.println(m);
+			}
+			double TCP_RTT = Double.parseDouble(reader.readLine());// receive TCP_RTT
+
+			// Calculating bandwidth, and then P
+			long start = System.currentTimeMillis();
+			for (int i = 0; i < bandwidthIterations; i++) {
+				reader.readLine();
+			}
+			long duration = System.currentTimeMillis() - start;
+			double mps = bandwidthIterations / (duration / 1000.0f);
+			double bandwidth = mps * leng * 8 / 1000000;
+			System.out.println("Bandwidth: " + bandwidth + ", mps: " + mps + ", TCP_RTT: " + TCP_RTT);
+			p = (int) ((bandwidth * 1000000 / 8) * (TCP_RTT / 1000)) / leng;
+			writer.println(p);
+		} catch (IOException ex) {
+			System.out.println("Server exception: " + ex.getMessage());
+			ex.printStackTrace();
+		}
+		return p;
+	}
+
+	public int calculatePSender(NodeId node) {
+		String m = new String(new char[leng]).replace('\0', ' ');
+		int p = 0;
+
+		try (Socket socket = new Socket(node.addr.getHostName(), port)) {
+			System.out.println("Testing the network...");
+			OutputStream output = socket.getOutputStream();
+			PrintWriter writer = new PrintWriter(output, true);
+			InputStream input = socket.getInputStream();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+
+			// Calculating RTT
+			long start = System.currentTimeMillis();
+			for (int i = 0; i < rttIterations; i++) {
+				writer.println(" ");
+				reader.readLine();
+			}
+			long duration = System.currentTimeMillis() - start;
+			double tcpRTT = ((double) duration) / ((double) rttIterations);
+			writer.println(tcpRTT); // send TCP_RTT
+
+			// Calculating bandwidth, and then P
+			for (int i = 0; i < bandwidthIterations; i++) {
+				writer.println(m);
+			}
+			p = Integer.parseInt(reader.readLine());
+		} catch (UnknownHostException ex) {
+			System.out.println("Server not found: " + ex.getMessage());
+		} catch (IOException ex) {
+			System.out.println("I/O error: " + ex.getMessage());
+		}
+		return p;
 	}
 }
 

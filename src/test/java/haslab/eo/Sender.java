@@ -6,7 +6,7 @@ public class Sender {
 	// 1: one-way, 2: bidirectional not RPC
 	private static final int COMTYPE2 = 2;
 	private static final int PORT = 1234;
-	private static int dstPort, iterations, len, P, warmUp = 10000, comType;
+	private static int dstPort, iterations, len, warmUp = 1000, comType;
 	private EOMiddleware eom;
 	private NodeId dstNode;
 
@@ -22,9 +22,8 @@ public class Sender {
 		iterations = Integer.parseInt(args[2]);
 		len = Integer.parseInt(args[3]);
 		comType = Integer.parseInt(args[4]);
-		P = Integer.parseInt(args[5]);
 
-		EOMiddleware eom = EOMiddleware.start(PORT, P);
+		EOMiddleware eom = EOMiddleware.start(PORT);
 		Sender s1 = new Sender(eom, dstHost, dstPort);
 		s1.new Sending().start();
 		if (comType == COMTYPE2)
@@ -43,7 +42,7 @@ public class Sender {
 				for (int i = 0; i < iterations; i++) {
 					eom.send(dstNode, m.getBytes());
 				}
-			} catch (InterruptedException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
