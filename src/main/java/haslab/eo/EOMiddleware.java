@@ -25,7 +25,7 @@ public class EOMiddleware {
 	private byte[] outData;
 	private boolean sendFirstTime = true, receiveFirstTime = true;
 	// for P calculations
-	private int port = 12121;
+	private int tcpPort = 12121;
 	private int bandwidthIterations = 1000000;
 	private int rttIterations = 10000;
 	private int leng = 1024;
@@ -399,7 +399,7 @@ public class EOMiddleware {
 
 	public int calculatePReceiver() throws IOException, InterruptedException {
 		int p = 0;
-		try (ServerSocket serverSocket = new ServerSocket(port)) {
+		try (ServerSocket serverSocket = new ServerSocket(tcpPort)) {
 			System.out.println("Testing the network...");
 			Socket socket = serverSocket.accept();
 			InputStream input = socket.getInputStream();
@@ -436,7 +436,7 @@ public class EOMiddleware {
 		String m = new String(new char[leng]).replace('\0', ' ');
 		int p = 0;
 
-		try (Socket socket = new Socket(node.addr.getHostName(), port)) {
+		try (Socket socket = new Socket(node.addr.getHostAddress(), tcpPort)) {
 			System.out.println("Testing the network...");
 			OutputStream output = socket.getOutputStream();
 			PrintWriter writer = new PrintWriter(output, true);
