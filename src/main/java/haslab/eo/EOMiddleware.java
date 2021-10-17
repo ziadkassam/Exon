@@ -26,8 +26,8 @@ public class EOMiddleware {
 	private boolean sendFirstTime = true, receiveFirstTime = true;
 	// for P calculations
 	private int tcpPort = 12121;
-	private int bandwidthIterations = 1000000;
-	private int rttIterations = 10000;
+	private int bandwidthIterations = 10000;
+	private int rttIterations = 100;
 	private int leng = 1024;
 	private int N_Multiplier = 4;
 
@@ -50,7 +50,6 @@ public class EOMiddleware {
 		if (sendFirstTime) {
 			sendFirstTime = false;
 			P = calculatePSender(node);
-			// P = 120;
 			N = P * N_Multiplier;
 			System.out.println("P= " + P + ", N=" + N);
 			System.out.println("----------------------------------- \n");
