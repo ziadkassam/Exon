@@ -1,4 +1,4 @@
-A PoC library implementation of Exon: Exactly-Once Oblivious Messaging Protocol
+A PoC library implementation of Exon: An Oblivious Exactly-Once Messaging Protocol
 ---
 
 Exon is a host-to-host message-based protocol that is optimized to guarantee the exactly-once (EO) delivery of these messages. 
